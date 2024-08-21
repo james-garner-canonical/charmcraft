@@ -33,6 +33,7 @@ class ProviderService(services.ProviderService):
 
     def setup(self) -> None:
         """Set up the provider service for Charmcraft."""
+        super().setup()
         self.environment["CHARMCRAFT_MANAGED_MODE"] = "1"
 
         # Pass-through host environment that target may need.
