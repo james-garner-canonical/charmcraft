@@ -127,6 +127,7 @@ parts:
     after: [charmcraft-libs, libgit2]
     source: .
     plugin: python
+    python-use-uv: true
     python-requirements:
       - requirements-jammy.txt
       - requirements.txt
@@ -154,7 +155,7 @@ parts:
     override-build: |
       craftctl default
       cp -v completion.bash ../install
-      sed -i -e '1 s|^#!/.*|#!/snap/charmcraft/current/bin/python -E|' $CRAFT_PART_INSTALL/bin/craftctl
+      sed -i -e '1 s|^#!/.*|#!/snap/charmcraft/current/bin/python3 -E|' $CRAFT_PART_INSTALL/bin/craftctl
     organize:
       bin/craftctl: libexec/charmcraft/craftctl
 
