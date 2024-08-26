@@ -15,6 +15,7 @@
 """Charmcraft-specific poetry plugin."""
 
 import json
+import pathlib
 import shlex
 import subprocess
 import sys
@@ -33,6 +34,7 @@ class PoetryPlugin(poetry_plugin.PoetryPlugin):
     def get_build_environment(self) -> dict[str, str]:
         return super().get_build_environment() | {
             "PATH": "$HOME/.local/bin:$PATH",
+            "PIP_NO_BINARY": ":all:",
         }
 
     def get_build_packages(self) -> set[str]:
@@ -48,10 +50,17 @@ class PoetryPlugin(poetry_plugin.PoetryPlugin):
     def _get_venv_directory(self) -> Path:
         return self._part_info.part_install_dir / "venv"
 
-    def _get_pip_command(self) -> str:
+    @overrides.override
+    def _get_pip_install_commands(self, requirements_path: pathlib.Path) -> list[str]:
         """Get the pip command for installing the package and its dependencies."""
-        requirements_path = self._part_info.part_build_dir / "requirements.txt"
-        return f"{self._get_pip()} install --requirement={requirements_path}"
+        pip = self._get_pip()
+        return [
+            # These steps need to be separate because poetry export defaults to including
+            # hashes, which don't work with installing from a directory.
+            f"{pip} install --no-dependencies --requirement={requirements_path}",
+            # Check that the virtualenv is consistent.
+            f"{pip} check",
+        ]
 
     def _get_package_install_commands(self) -> list[str]:
         return [
